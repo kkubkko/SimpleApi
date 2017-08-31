@@ -118,7 +118,7 @@ func reachabilityChanged(sender: SimpleApi, isReachable: Bool, via: ConnectionTy
 
 ## Author
 
-kkubkko, kkubkko@gmail.com
+kkubkko, kkubkko@gmail.com  
 Pali tiež trochu pomohol...
 
 ## License
