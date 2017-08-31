@@ -13,24 +13,38 @@ import RealmSwift
 import ObjectMapper
 import ReachabilitySwift
 
-let kNoInternetNotification = Notification.Name(rawValue: "kNoInternetNotification")
-let kInternetIsBackNotification = Notification.Name(rawValue: "kInternetIsBackNotification")
+public let kNoInternetNotification = Notification.Name(rawValue: "kNoInternetNotification")
+public let kInternetIsBackNotification = Notification.Name(rawValue: "kInternetIsBackNotification")
 
 /** Api manager class
  - important: Use as singleton only with attribute **.shared**
  */
 public class SimpleApi: NSObject {
     
-    public var autoSaveToRealm: Bool = true
-    public var callLastApiCallAfterInternetComesBack = true
-    public var defaultMethod: CallMethod = .get
-    public var defaultParamEncoding: ParamsEncoding = .standard
-    public var defaultHeaders: [String: String]? = nil
-    
+    //MARK: - public attributes
+    public var autoSaveToRealm: Bool = true {
+        didSet{ saveToRealm() }
+    }
+    public var callLastApiCallAfterInternetComesBack = true {
+        didSet{ saveToRealm() }
+    }
+    public var defaultMethod: CallMethod = .get {
+        didSet{ saveToRealm() }
+    }
+    public var defaultParamEncoding: ParamsEncoding = .standard {
+        didSet{ saveToRealm() }
+    }
+    public var defaultHeaders: [String: String]? = nil {
+        didSet{ saveToRealm() }
+    }
     public static let shared = SimpleApi()
+    
+    //MARK: - private attributes
     private let reachability = Reachability()!
     private var firstChange:Bool = true
     private var lastCalled:()->Void = {}
+    private var delegates:[SimpleApiDelegate] = []
+    private var isLoading:Bool = false
     
     typealias successParam = ()->Void
     typealias failureParam = (_ error:String)->Void
@@ -44,6 +58,7 @@ public class SimpleApi: NSObject {
         }catch{
             print("could not start reachability notifier")
         }
+        loadFromRealm()
     }
     
     deinit {
@@ -56,18 +71,18 @@ public class SimpleApi: NSObject {
     /**
      - important: All params except **type** and **url** are optional
      - parameters:
-     - type: Object type
-     - url: String with url
-     - method: Use this parameter in your method call if you want to override *defaultMethod* property
-     - parameters: Call parameters in `[String:Any]` format
-     - paramsEncoding: Use this parameter in your method call if you want to override *defaultParamEncoding* property
-     - headers: Use this parameter in your method call if you want to override *defaultHeaders* property
-     - saveResponseToRealm: Use this parameter in your method call if you want to override *automaticalySaveToRealm* property
-     - success: Success completion block with received object
-     - object: Object that is included in success completion block
-     - fail: Failure completion block with *SimpleApiError* param. If this param is **.fail**, additional *Error* param is included
-     - apiError: Always included in fail block
-     - error: Appears in fail block if *apiErrors* value is **.fail**
+         - type: Object type
+         - url: String with url
+         - method: Use this parameter in your method call if you want to override *defaultMethod* property
+         - parameters: Call parameters in `[String:Any]` format
+         - paramsEncoding: Use this parameter in your method call if you want to override *defaultParamEncoding* property
+         - headers: Use this parameter in your method call if you want to override *defaultHeaders* property
+         - saveResponseToRealm: Use this parameter in your method call if you want to override *automaticalySaveToRealm* property
+         - success: Success completion block with received object
+         - object: Object that is included in success completion block
+         - fail: Failure completion block with *SimpleApiError* param. If this param is **.fail**, additional *Error* param is included
+         - apiError: Always included in fail block
+         - error: Appears in fail block if *apiErrors* value is **.fail**
      */
     public func get <T:Object>(type:T.Type,
               url:String,
@@ -119,18 +134,18 @@ public class SimpleApi: NSObject {
     /**
      - important: All params except **type** and **url** are optional
      - parameters:
-     - type: Object type
-     - url: String with url
-     - method: Use this parameter in your method call if you want to override *defaultMethod* property
-     - parameters: Call parameters in `[String:Any]` format
-     - paramsEncoding: Use this parameter in your method call if you want to override *defaultParamEncoding* property
-     - headers: Use this parameter in your method call if you want to override *defaultHeaders* property
-     - saveResponseToRealm: Use this parameter in your method call if you want to override *automaticalySaveToRealm* property
-     - success: Success completion block with received object
-     - objects: Objects that are included in success completion block
-     - fail: Failure completion block with *SimpleApiError* param. If this param is **.fail**, additional *Error* param is included
-     - apiError: Always included in fail block
-     - error: Appears in fail block if *apiErrors* value is **.fail**
+         - type: Object type
+         - url: String with url
+         - method: Use this parameter in your method call if you want to override *defaultMethod* property
+         - parameters: Call parameters in `[String:Any]` format
+         - paramsEncoding: Use this parameter in your method call if you want to override *defaultParamEncoding* property
+         - headers: Use this parameter in your method call if you want to override *defaultHeaders* property
+         - saveResponseToRealm: Use this parameter in your method call if you want to override *automaticalySaveToRealm* property
+         - success: Success completion block with received object
+         - objects: Objects that are included in success completion block
+         - fail: Failure completion block with *SimpleApiError* param. If this param is **.fail**, additional *Error* param is included
+         - apiError: Always included in fail block
+         - error: Appears in fail block if *apiErrors* value is **.fail**
      */
     public func getArray<T:Object>(type:T.Type,
                           url:String,
@@ -183,7 +198,7 @@ public class SimpleApi: NSObject {
         let reachability = sender.object as! Reachability
         
         if reachability.isReachable {
-            //on first change, don't react to the notification if online
+            //on first change, don't react to the notification of connection change
             if firstChange == true {
                 firstChange = false
                 return
@@ -194,23 +209,77 @@ public class SimpleApi: NSObject {
             }
             NotificationCenter.default.post(Notification(name: kInternetIsBackNotification))
             if reachability.isReachableViaWiFi {
-                print("Reachable via WiFi")
+                reachabilityNotifyDelegates(internetConnection: true, via: .wifi)
             } else {
-                print("Reachable via Cellular")
-                
+                reachabilityNotifyDelegates(internetConnection: true, via: .cellular)
             }
         } else {
-            print("Network not reachable")
             NotificationCenter.default.post(Notification(name: kNoInternetNotification))
+            reachabilityNotifyDelegates(internetConnection: false, via: .noInternet)
         }
     }
     
     public func isReachable()->Bool{
         return reachability.isReachable
     }
+    
+    //MARK: - delegates handling
+    public func addDelegate(_ delegate:SimpleApiDelegate) {
+        self.delegates.append(delegate)
+    }
+    
+    public func removeDelegate(_ delegate:SimpleApiDelegate) {
+        if let index = self.delegates.index(where: { (item) -> Bool in item === delegate }) {
+            self.delegates.remove(at: index)
+        }
+    }
+    
+    private func reachabilityNotifyDelegates(internetConnection:Bool, via:ConnectionType) {
+        for delegate in delegates {
+            delegate.reachabilityChanged(sender: self, isReachable: internetConnection, via: via)
+        }
+    }
+    
+    //MARK: - private saving/loading
+    private func loadFromRealm(){
+        isLoading = true
+        
+        let object = DataManager.shared.get(type: SimpleApiRealm.self, identifier: "SimpleApiRealm")
+        autoSaveToRealm = object.autoSaveToRealm
+        callLastApiCallAfterInternetComesBack = object.callLastApiCallAfterInternetComesBack
+        defaultMethod = object.defaultMethod
+        defaultParamEncoding = object.defaultParamEncoding
+        defaultHeaders = object.defaultHeaders
+        
+        isLoading = false
+    }
+    
+    private func saveToRealm(){
+        if isLoading { return }
+        
+        let object = SimpleApiRealm()
+        object.autoSaveToRealm = autoSaveToRealm
+        object.callLastApiCallAfterInternetComesBack = callLastApiCallAfterInternetComesBack
+        object.defaultMethod = defaultMethod
+        object.defaultParamEncoding = defaultParamEncoding
+        object.defaultHeaders = defaultHeaders
+        DataManager.shared.save(object: object)
+    }
 }
 
-public enum ParamsEncoding {
+//MARK: - protocol
+public protocol SimpleApiDelegate: class {
+    func reachabilityChanged(sender:SimpleApi, isReachable:Bool, via:ConnectionType)
+}
+
+//MARK: - enums
+public enum ConnectionType {
+    case wifi
+    case cellular
+    case noInternet
+}
+
+public enum ParamsEncoding: Int {
     case standard
     case httpBody
 }
@@ -236,6 +305,74 @@ fileprivate extension DispatchQueue {
     }
 }
 
+//MARK: - SimpleApi realm object
+class SimpleApiRealm: Object {
+    
+    dynamic var id: String = "SimpleApiRealm"
+    dynamic var autoSaveToRealm: Bool = true
+    dynamic var callLastApiCallAfterInternetComesBack = true
+    dynamic private var defaultMethodString: String = "GET"
+    var defaultMethod:CallMethod{
+        get{ return CallMethod(rawValue: defaultMethodString)! }
+        set{ defaultMethodString = newValue.rawValue }
+    }
+    dynamic private var defaultParamsEncodingInt:Int = 0
+    var defaultParamEncoding: ParamsEncoding{
+        get{ return ParamsEncoding(rawValue: defaultParamsEncodingInt)! }
+        set{ defaultParamsEncodingInt = newValue.rawValue }
+    }
+    private let defaultHeadersData = List<DictionaryPair>()
+    var defaultHeaders: [String: String]? {
+        get {
+            if defaultHeadersData.count == 0 {
+                return nil
+            }
+            
+            var dict = [String:String]()
+            for pair in defaultHeadersData {
+                dict[pair.key] = pair.value
+            }
+            return dict
+        }
+        set {
+            if newValue == nil {
+                defaultHeadersData.removeAll()
+            } else {
+                defaultHeadersData.removeAll()
+                for item in newValue! {
+                    defaultHeadersData.append(DictionaryPair(key: item.key, value: item.value))
+                }
+            }
+        }
+    }
+    
+    override static func ignoredProperties() -> [String] {
+        return ["defaultHeaders", "defaultParamEncoding", "defaultMethod"]
+    }
+    
+    override class func primaryKey() -> String? {
+        return "id"
+    }
+    
+    required convenience init?(map: Map) {
+        self.init()
+    }
+}
+
+class DictionaryPair: Object{
+    
+    dynamic var key:String = ""
+    dynamic var value:String = ""
+    
+    convenience init(key:String, value:String){
+        self.init()
+        self.key = key
+        self.value = value
+    }
+}
+
+
+//MARK: - Data manager
 fileprivate class DataManager: NSObject {
     
     static let shared = DataManager()
@@ -257,24 +394,11 @@ fileprivate class DataManager: NSObject {
         completion()
     }
     
-    func getAll <T:Object> (type:T.Type) -> Results<T> {
-        let realm = try! Realm()
-        return realm.objects(type)
-    }
-    
     func get<T:Object> (type:T.Type, identifier:String) -> T {
         let realm = try! Realm()
         if let result = realm.object(ofType: type, forPrimaryKey: identifier) {
             return result
         }
         return T()
-    }
-    
-    func doInWriteBlock(closure:() -> (), completion: ()->Void = {}) {
-        let realm = try! Realm()
-        try! realm.write {
-            closure()
-            completion()
-        }
     }
 }
