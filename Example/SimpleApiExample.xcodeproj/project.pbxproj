@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		581197B0F18870D60FC630ED /* Pods_SimpleApiExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBA90054CAE6E640FF1B4C7C /* Pods_SimpleApiExample.framework */; };
+		8B359A1D1F58395200AE2FCE /* PetsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B359A1C1F58395200AE2FCE /* PetsVC.swift */; };
 		8BFBB2F81F571CEA00BC422F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFBB2F71F571CEA00BC422F /* AppDelegate.swift */; };
 		8BFBB2FA1F571CEA00BC422F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFBB2F91F571CEA00BC422F /* ViewController.swift */; };
 		8BFBB2FD1F571CEA00BC422F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8BFBB2FB1F571CEA00BC422F /* Main.storyboard */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8B359A1C1F58395200AE2FCE /* PetsVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PetsVC.swift; sourceTree = "<group>"; };
 		8BFBB2F41F571CEA00BC422F /* SimpleApiExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleApiExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BFBB2F71F571CEA00BC422F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8BFBB2F91F571CEA00BC422F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -72,6 +74,7 @@
 			children = (
 				8BFBB2F71F571CEA00BC422F /* AppDelegate.swift */,
 				8BFBB2F91F571CEA00BC422F /* ViewController.swift */,
+				8B359A1C1F58395200AE2FCE /* PetsVC.swift */,
 				8BFBB2FB1F571CEA00BC422F /* Main.storyboard */,
 				8BFBB2FE1F571CEA00BC422F /* Assets.xcassets */,
 				8BFBB3001F571CEA00BC422F /* LaunchScreen.storyboard */,
@@ -214,6 +217,7 @@
 			files = (
 				8BFBB2FA1F571CEA00BC422F /* ViewController.swift in Sources */,
 				8BFBB2F81F571CEA00BC422F /* AppDelegate.swift in Sources */,
+				8B359A1D1F58395200AE2FCE /* PetsVC.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -6,8 +6,6 @@
 //  Copyright © 2017 kkubkko. All rights reserved.
 //
 import UIKit
-import RealmSwift
-import ObjectMapper
 import SimpleApi
 
 class ViewController: UIViewController, UITableViewDataSource {
@@ -19,28 +17,7 @@ class ViewController: UIViewController, UITableViewDataSource {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        
-        SimpleApi.shared.get(type: TestObject.self, url: "url")
-        
-        SimpleApi.shared.get(type: TestObject.self,
-                             url: "url",
-                             method: .get,
-                             parameters: ["param1" : "value1"],
-                             paramsEncoding: .httpBody,
-                             headers: ["token" : "tokenValue"],
-                             saveResponseToRealm: false,
-                             success: { (object) in
-                                print("I have received: \(object)")
-        }) { (apiError, error) in
-            print("Api failed due to: \(apiError)")
-        }
-        
-        SimpleApi.shared.getArray(type: TestObject.self, url: "url")
-    }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        tableView.tableFooterView = UIView()
     }
     
     //MARK: - table view
@@ -54,6 +31,12 @@ class ViewController: UIViewController, UITableViewDataSource {
         //odd rows handle network changes with delegate method
         cell.setType(indexPath.row % 2 == 0 ? .delegate : .notification)
         return cell
+    }
+    
+    //MARK: - actions
+    @IBAction func goToPetScreen(_ sender: UIButton) {
+        let vc = self.storyboard!.instantiateViewController(withIdentifier: "PetsVC")
+        self.navigationController?.pushViewController(vc, animated: true)
     }
 }
 
@@ -71,6 +54,7 @@ class BasicCell:UITableViewCell, SimpleApiDelegate{
         statusView.backgroundColor = SimpleApi.shared.isReachable() ? UIColor.green : UIColor.red
     }
     
+    //Simple api delegate method - for internet changes information
     func reachabilityChanged(sender: SimpleApi, isReachable: Bool, via: ConnectionType) {
         //change status color based on delegate method call
         statusView.backgroundColor = isReachable ? UIColor.green : UIColor.red
@@ -104,17 +88,4 @@ class BasicCell:UITableViewCell, SimpleApiDelegate{
 enum CellListenerType{
     case delegate
     case notification
-}
-
-//MARK: - realm object
-class TestObject: Object, Mappable {
-    dynamic var name = ""
-    
-    func mapping(map: Map) {
-        name <- map["name"]
-    }
-    
-    required convenience init?(map: Map) {
-        self.init()
-    }
 }

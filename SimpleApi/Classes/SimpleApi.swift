@@ -90,7 +90,7 @@ public class SimpleApi: NSObject {
               parameters:[String: Any]? = nil,
               paramsEncoding:ParamsEncoding? = nil,
               headers:[String: String]? = nil,
-              saveResponseToRealm:Bool? = false,
+              saveResponseToRealm:Bool? = nil,
               success:@escaping (_ object:T)->Void = {_ in },
               fail:@escaping (_ apiError:SimpleApiError, _ error:Error?)->Void = {_ in })
         where T:Mappable {
@@ -153,7 +153,7 @@ public class SimpleApi: NSObject {
                           parameters:[String: Any]? = nil,
                           paramsEncoding:ParamsEncoding? = nil,
                           headers:[String: String]? = nil,
-                          saveResponseToRealm:Bool? = false,
+                          saveResponseToRealm:Bool? = nil,
                           success:@escaping (_ objects:[T])->Void = {_ in },
                           fail:@escaping (_ apiError:SimpleApiError, _ error:Error?)->Void = {_ in }) where T:Mappable {
         if isReachable() == false {
