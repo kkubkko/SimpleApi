@@ -1,11 +1,5 @@
 use_frameworks!
 
-target 'SimpleApi_Example' do
+target 'SimpleApiExample' do
   pod 'SimpleApi', :path => '../'
-
-  target 'SimpleApi_Tests' do
-    inherit! :search_paths
-
-    
-  end
 end

@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
   s.name             = 'SimpleApi'
   s.version          = '0.1.0'
-  s.summary          = 'A short description of SimpleApi.'
+  s.summary          = 'SimpleApi handles api calls and object parsing with minimum work'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -18,19 +18,28 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+					SimpleApi handles api calls and object parsing with minimum work
                        DESC
 
   s.homepage         = 'https://github.com/kkubkko/SimpleApi'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'kkubkko' => 'jakub.kozak@touchart.cz' }
+  s.author           = { 'kkubkko' => 'kkubkko@gmail.com' }
   s.source           = { :git => 'https://github.com/kkubkko/SimpleApi.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '10.3'
 
   s.source_files = 'SimpleApi/Classes/**/*'
+  s.source_files = 'SimpleApi/Classes/*.{swift}'
+
+  s.frameworks = 'Foundation'
+
+  s.dependency 'RealmSwift'
+  s.dependency 'ObjectMapper+Realm'
+  s.dependency 'AlamofireObjectMapper'
+  s.dependency 'Alamofire'
+  s.dependency 'ReachabilitySwift'
   
   # s.resource_bundles = {
   #   'SimpleApi' => ['SimpleApi/Assets/*.png']
