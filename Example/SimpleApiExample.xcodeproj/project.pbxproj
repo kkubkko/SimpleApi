@@ -123,6 +123,7 @@
 				TargetAttributes = {
 					8BFBB2F31F571CEA00BC422F = {
 						CreatedOnToolsVersion = 8.3.3;
+						DevelopmentTeam = MNWSHJ4D42;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -338,6 +339,7 @@
 			baseConfigurationReference = CE2BF242EA89F84BE85CC374 /* Pods-SimpleApiExample.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = MNWSHJ4D42;
 				INFOPLIST_FILE = SimpleApiExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kkubkko.SimpleApiExample;
@@ -351,6 +353,7 @@
 			baseConfigurationReference = BEE370A92054BB4D7A24E171 /* Pods-SimpleApiExample.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = MNWSHJ4D42;
 				INFOPLIST_FILE = SimpleApiExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kkubkko.SimpleApiExample;
@@ -378,6 +381,7 @@
 				8BFBB3081F571CEA00BC422F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
