@@ -11,7 +11,7 @@ import Alamofire
 import AlamofireObjectMapper
 import RealmSwift
 import ObjectMapper
-import ReachabilitySwift
+import Reachability
 
 public let kNoInternetNotification = Notification.Name(rawValue: "kNoInternetNotification")
 public let kInternetIsBackNotification = Notification.Name(rawValue: "kInternetIsBackNotification")
@@ -52,7 +52,7 @@ public class SimpleApi: NSObject {
     //MARK: - basic
     private override init() {
         super.init()
-        NotificationCenter.default.addObserver(self, selector: #selector(reachabilityChanged(sender:)), name: ReachabilityChangedNotification, object: reachability)
+        NotificationCenter.default.addObserver(self, selector: #selector(reachabilityChanged(sender:)), name: .reachabilityChanged, object: reachability)
         do{
             try reachability.startNotifier()
         }catch{
