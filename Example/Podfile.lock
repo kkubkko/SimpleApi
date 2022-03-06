@@ -1,0 +1,52 @@
+PODS:
+  - Alamofire (5.0.0-rc.2)
+  - AlamofireObjectMapper (6.2.0):
+    - Alamofire (= 5.0.0-rc.2)
+    - ObjectMapper (~> 3.5.1)
+  - ObjectMapper (3.5.3)
+  - "ObjectMapper+Realm (1.2)":
+    - ObjectMapper
+    - RealmSwift
+  - ReachabilitySwift (5.0.0)
+  - Realm (10.23.0):
+    - Realm/Headers (= 10.23.0)
+  - Realm/Headers (10.23.0)
+  - RealmSwift (10.23.0):
+    - Realm (= 10.23.0)
+  - SimpleApi (0.2.0):
+    - Alamofire
+    - AlamofireObjectMapper
+    - "ObjectMapper+Realm"
+    - ReachabilitySwift
+    - RealmSwift
+
+DEPENDENCIES:
+  - SimpleApi (from `../`)
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - AlamofireObjectMapper
+    - ObjectMapper
+    - "ObjectMapper+Realm"
+    - ReachabilitySwift
+    - Realm
+    - RealmSwift
+
+EXTERNAL SOURCES:
+  SimpleApi:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Alamofire: f9450d3c7f6bea2ad62e7a541c3e9b186c7991d6
+  AlamofireObjectMapper: 74d1440c92c42bbcc2b5f4dc81654ac095ec669f
+  ObjectMapper: 97111c97e054a6ee25917662106689f0b4127b37
+  "ObjectMapper+Realm": 0f8d0ac5b0e87ba63d2d0bea76a111b4eae98b9a
+  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
+  Realm: bdac9baede54becb2883f319fc50e9e12b35235c
+  RealmSwift: e083456e083dcfd6ef9087cdde6b031ec6224783
+  SimpleApi: 4b6c5fec2fcdf87154976d1f8d323e2fd7f73b2f
+
+PODFILE CHECKSUM: 5357152e578ce57c1c9411cea1f30812467675c6
+
+COCOAPODS: 1.11.2

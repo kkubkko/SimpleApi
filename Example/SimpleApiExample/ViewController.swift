@@ -75,11 +75,11 @@ class BasicCell:UITableViewCell, SimpleApiDelegate{
     }
     
     //MARK: - notification handlers
-    func noInternet(sender:Notification){
+    @objc func noInternet(sender:Notification){
         statusView.backgroundColor = UIColor.red
     }
     
-    func internetIsBack(sender:Notification){
+    @objc func internetIsBack(sender:Notification){
         statusView.backgroundColor = UIColor.green
     }
 }

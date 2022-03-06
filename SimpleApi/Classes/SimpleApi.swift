@@ -40,7 +40,7 @@ public class SimpleApi: NSObject {
     public static let shared = SimpleApi()
     
     //MARK: - private attributes
-    private let reachability = Reachability()!
+    private let reachability = try! Reachability()
     private var firstChange:Bool = true
     private var lastCalled:()->Void = {}
     private var delegates:[SimpleApiDelegate] = []
@@ -92,7 +92,7 @@ public class SimpleApi: NSObject {
               headers:[String: String]? = nil,
               saveResponseToRealm:Bool? = nil,
               success:@escaping (_ object:T)->Void = {_ in },
-              fail:@escaping (_ apiError:SimpleApiError, _ error:Error?)->Void = {_ in })
+                               fail:@escaping (_ apiError:SimpleApiError, _ error:Error?)->Void = {_,_  in })
         where T:Mappable {
             
             if isReachable() == false {
@@ -102,27 +102,24 @@ public class SimpleApi: NSObject {
             }
             
             //params preparation
-            let al_method = method == nil ? HTTPMethod(rawValue: defaultMethod.rawValue)! : HTTPMethod(rawValue: method!.rawValue)!
+            let al_method = method == nil ? HTTPMethod(rawValue: defaultMethod.rawValue) : HTTPMethod(rawValue: method!.rawValue)
             let encoding = paramsEncoding == nil ? defaultParamEncoding : paramsEncoding
             let al_encoding = encoding == .standard ? URLEncoding.default : URLEncoding.httpBody
             let al_headers = headers == nil ? defaultHeaders : headers
+            let af_headers = HTTPHeaders(al_headers ?? [:])
             
-            Alamofire.request(url, method: al_method, parameters: parameters, encoding: al_encoding, headers: al_headers).responseObject { (response: DataResponse<T>) in
+            AF.request(url, method: al_method, parameters: parameters, encoding: al_encoding, headers: af_headers).responseObject { (response: DataResponse<T, AFError>) in
                 switch response.result {
-                case .success(_):
-                    guard (response.result.value != nil) else {
-                        fail(.emptyResponse, nil)
-                        return
-                    }
+                case .success(let value):
                     let shouldSaveToRealm = saveResponseToRealm == nil ? self.autoSaveToRealm : saveResponseToRealm!
                     if shouldSaveToRealm {
                         DispatchQueue.background.async {
-                            let object = response.result.value!
+                            let object = value
                             DataManager.shared.save(object: object)
                             success(object)
                         }
                     } else {
-                        let object = response.result.value!
+                        let object = value
                         success(object)
                     }
                 case .failure(let error):
@@ -155,7 +152,7 @@ public class SimpleApi: NSObject {
                           headers:[String: String]? = nil,
                           saveResponseToRealm:Bool? = nil,
                           success:@escaping (_ objects:[T])->Void = {_ in },
-                          fail:@escaping (_ apiError:SimpleApiError, _ error:Error?)->Void = {_ in }) where T:Mappable {
+                                   fail:@escaping (_ apiError:SimpleApiError, _ error:Error?)->Void = {_,_  in }) where T:Mappable {
         if isReachable() == false {
             lastCalled = { self.getArray(type: type, url: url, method: method, parameters: parameters, paramsEncoding: paramsEncoding, headers: headers, saveResponseToRealm: saveResponseToRealm, success: success, fail: fail) }
             fail(.noInternet, nil)
@@ -163,27 +160,25 @@ public class SimpleApi: NSObject {
         }
         
         //params preparation
-        let al_method = method == nil ? HTTPMethod(rawValue: defaultMethod.rawValue)! : HTTPMethod(rawValue: method!.rawValue)!
+        let al_method = method == nil ? HTTPMethod(rawValue: defaultMethod.rawValue) : HTTPMethod(rawValue: method!.rawValue)
         let encoding = paramsEncoding == nil ? defaultParamEncoding : paramsEncoding
         let al_encoding = encoding == .standard ? URLEncoding.default : URLEncoding.httpBody
         let al_headers = headers == nil ? defaultHeaders : headers
+        let af_headers = HTTPHeaders(al_headers ?? [:])
         
-        Alamofire.request(url, method: al_method, parameters: parameters, encoding: al_encoding, headers: al_headers).responseArray { (response: DataResponse<[T]>) in
+        
+        AF.request(url, method: al_method, parameters: parameters, encoding: al_encoding, headers: af_headers).responseArray { (response: DataResponse<[T], AFError>) in
             switch response.result {
-            case .success(_):
-                guard (response.result.value != nil) else {
-                    fail(.emptyResponse, nil)
-                    return
-                }
+            case .success(let value):
                 let shouldSaveToRealm = saveResponseToRealm == nil ? self.autoSaveToRealm : saveResponseToRealm!
                 if shouldSaveToRealm {
                     DispatchQueue.background.async {
-                        let objectsArr = response.result.value!
+                        let objectsArr = value
                         DataManager.shared.save(objects: objectsArr)
                         success(objectsArr)
                     }
                 } else {
-                    let objectsArr = response.result.value!
+                    let objectsArr = value
                     success(objectsArr)
                 }
             case .failure(let error):
@@ -193,7 +188,7 @@ public class SimpleApi: NSObject {
     }
     
     //MARK: - Reachability
-    func reachabilityChanged(sender: NSNotification) {
+    @objc func reachabilityChanged(sender: NSNotification) {
         
         let reachability = sender.object as! Reachability
         
@@ -308,15 +303,15 @@ fileprivate extension DispatchQueue {
 //MARK: - SimpleApi realm object
 class SimpleApiRealm: Object {
     
-    dynamic var id: String = "SimpleApiRealm"
-    dynamic var autoSaveToRealm: Bool = true
-    dynamic var callLastApiCallAfterInternetComesBack = true
-    dynamic private var defaultMethodString: String = "GET"
+    @objc dynamic var id: String = "SimpleApiRealm"
+    @objc dynamic var autoSaveToRealm: Bool = true
+    @objc dynamic var callLastApiCallAfterInternetComesBack = true
+    @objc dynamic private var defaultMethodString: String = "GET"
     var defaultMethod:CallMethod{
         get{ return CallMethod(rawValue: defaultMethodString)! }
         set{ defaultMethodString = newValue.rawValue }
     }
-    dynamic private var defaultParamsEncodingInt:Int = 0
+    @objc dynamic private var defaultParamsEncodingInt:Int = 0
     var defaultParamEncoding: ParamsEncoding{
         get{ return ParamsEncoding(rawValue: defaultParamsEncodingInt)! }
         set{ defaultParamsEncodingInt = newValue.rawValue }
@@ -354,15 +349,15 @@ class SimpleApiRealm: Object {
         return "id"
     }
     
-    required convenience init?(map: Map) {
+    required convenience init?(map: ObjectMapper.Map) {
         self.init()
     }
 }
 
 class DictionaryPair: Object{
     
-    dynamic var key:String = ""
-    dynamic var value:String = ""
+    @objc dynamic var key:String = ""
+    @objc dynamic var value:String = ""
     
     convenience init(key:String, value:String){
         self.init()
@@ -382,14 +377,14 @@ fileprivate class DataManager: NSObject {
     func save(object:Object) {
         let realm = try! Realm()
         try! realm.write {
-            realm.add(object, update:true)
+            realm.add(object, update: .all)
         }
     }
     
     func save(objects:[Object], completion: ()->Void = {}) {
         let realm = try! Realm()
         try! realm.write {
-            realm.add(objects, update: true)
+            realm.add(objects, update: .all)
         }
         completion()
     }

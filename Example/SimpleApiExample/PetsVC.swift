@@ -15,7 +15,7 @@ class PetsVC: UIViewController, UITableViewDataSource {
     
     @IBOutlet private weak var tableView: UITableView!
     
-    
+    private var realm = try! Realm()
     private var pets = try! Realm().objects(Pet.self)
     private var realmToken: NotificationToken!
 
@@ -65,20 +65,25 @@ class PetsVC: UIViewController, UITableViewDataSource {
     //MARK: - realm token
     private func prepareToken() {
         //I think that this code functionality is obvious. If it's not, look at Realm page
-        realmToken = pets.addNotificationBlock{ [weak self] (changes: RealmCollectionChange) in
-            guard let tableView = self?.tableView else { return }
-            
-            switch changes {
-            case .initial, .update(_, deletions: _, insertions: _, modifications: _):
-                // Results are now populated and can be accessed without blocking the UI
-                tableView.reloadData()
-                break
-            case .error(let error):
-                // An error occurred while opening the Realm file on the background worker thread
-                fatalError("\(error)")
-                break
-            }
-        }
+        realmToken = realm.observe({ notification, realm in
+            guard let tableView = self.tableView else { return }
+            tableView.reloadData()
+        })
+        
+//        realmToken = pets.addNotificationBlock{ [weak self] (changes: RealmCollectionChange) in
+//            guard let tableView = self?.tableView else { return }
+//
+//            switch changes {
+//            case .initial, .update(_, deletions: _, insertions: _, modifications: _):
+//                // Results are now populated and can be accessed without blocking the UI
+//                tableView.reloadData()
+//                break
+//            case .error(let error):
+//                // An error occurred while opening the Realm file on the background worker thread
+//                fatalError("\(error)")
+//                break
+//            }
+//        }
     }
 
 }
@@ -98,11 +103,11 @@ class PetCell:UITableViewCell {
 //MARK: - realm object
 //Example of simple Realm Object that implements Mappable protocol. Thanks to this it can be parsed easily.
 class Pet: Object, Mappable {
-    dynamic var name: String = ""
-    dynamic var type: String = ""
-    dynamic var age: Int = 0
+    @objc dynamic var name: String = ""
+    @objc dynamic var type: String = ""
+    @objc dynamic var age: Int = 0
     
-    func mapping(map: Map) {
+    func mapping(map: ObjectMapper.Map) {
         name <- map["name"]
         type <- map["type"]
         age <- map["age"]
@@ -112,7 +117,7 @@ class Pet: Object, Mappable {
         return "name"
     }
     
-    required convenience init?(map: Map) {
+    required convenience init?(map: ObjectMapper.Map) {
         self.init()
     }
 }

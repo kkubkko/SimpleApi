@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'SimpleApi'
-  s.version          = '0.1.0'
+  s.version          = '0.2.0'
   s.summary          = 'SimpleApi handles api calls and object parsing with minimum work'
 
 # This description is used to generate tags and improve search results.
