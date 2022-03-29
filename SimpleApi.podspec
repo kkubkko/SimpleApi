@@ -38,7 +38,7 @@ Pod::Spec.new do |s|
   s.dependency 'RealmSwift'
   s.dependency 'ObjectMapper+Realm'
   s.dependency 'AlamofireObjectMapper'
-  s.dependency 'Alamofire'
+  s.dependency 'Alamofire', '>= 0'
   s.dependency 'ReachabilitySwift'
   
   # s.resource_bundles = {
